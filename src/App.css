@@ -282,7 +282,7 @@ button:focus-visible {
   display: grid;
   justify-items: center;
   text-align: center;
-  background: linear-gradient(160deg, rgba(91, 255, 127, 0.2), rgba(91, 255, 97, 0.06));
+  background: linear-gradient(160deg, rgba(26, 83, 239, 0.51), rgba(108, 75, 28, 0.57));
   border: 1px solid rgba(91, 124, 255, 0.4);
   border-radius: var(--radius-md);
   padding: 0.75rem 1rem;
