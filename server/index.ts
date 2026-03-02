@@ -16,7 +16,7 @@ app.use(express.json())
 app.get('/api/health', (_req, res) => {
   res.json({
     status: 'ok',
-    service: 'chordpilot-api',
+    service: 'spacechord-api',
     time: new Date().toISOString(),
   })
 })
@@ -156,7 +156,7 @@ app.post('/api/import/url', async (req, res) => {
   try {
     const response = await fetch(url, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; ChordPilotImporter/1.0)',
+        'User-Agent': 'Mozilla/5.0 (compatible; SpacechordImporter/1.0)',
       },
     })
     if (!response.ok) {
@@ -204,7 +204,7 @@ app.post('/api/billing/checkout', async (req, res) => {
           price_data: {
             currency: 'usd',
             product_data: {
-              name: 'ChordPilot Pro',
+              name: 'Spacechord Pro',
             },
             recurring: { interval: 'month' },
             unit_amount: 1900,
@@ -223,7 +223,7 @@ app.post('/api/billing/checkout', async (req, res) => {
 
 if (process.env.NODE_ENV !== 'test') {
   app.listen(port, () => {
-    console.info(`ChordPilot API listening on port ${port}`)
+    console.info(`Spacechord API listening on port ${port}`)
   })
 }
 

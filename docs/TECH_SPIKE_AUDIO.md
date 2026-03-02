@@ -2,7 +2,7 @@
 
 ## Question
 
-Should ChordPilot Pro rely only on browser audio, or use an optional native helper for low-latency professional sessions?
+Should Spacechord Pro rely only on browser audio, or use an optional native helper for low-latency professional sessions?
 
 ## Options Compared
 

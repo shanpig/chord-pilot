@@ -1,8 +1,8 @@
-# ChordPilot Pro PRD (v1.0)
+# Spacechord Pro PRD (v1.0)
 
 ## Product Intent
 
-ChordPilot Pro is a web-first performance app for creators who record song covers by stepping through chord progressions in real time. The product removes theory-heavy setup and gives performers direct controls for chord triggering, progression navigation, and recording/export.
+Spacechord Pro is a web-first performance app for creators who record song covers by stepping through chord progressions in real time. The product removes theory-heavy setup and gives performers direct controls for chord triggering, progression navigation, and recording/export.
 
 ## Primary Users
 

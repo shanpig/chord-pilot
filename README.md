@@ -1,6 +1,6 @@
-# ChordPilot Pro Web
+# Spacechord Pro Web
 
-ChordPilot Pro is a web-first chord performance and cover-recording app. It lets musicians import song progressions, trigger rich chord voicings with mapped controls, step through sections live, and export takes as WAV, WEBM, and MIDI-like event data.
+Spacechord Pro is a web-first chord performance and cover-recording app. It lets musicians import song progressions, trigger rich chord voicings with mapped controls, step through sections live, and export takes as WAV, WEBM, and MIDI-like event data.
 
 ## Features Implemented
 

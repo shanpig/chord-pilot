@@ -274,20 +274,20 @@ export const useChordPilotStore = create<ChordPilotState>((set, get) => ({
     if (!take) return
     const wavBlob = renderEventsToWav(take.events)
     if (wavBlob.size === 0) return
-    downloadBlob(wavBlob, `chordpilot-${takeId}.wav`)
+    downloadBlob(wavBlob, `spacechord-${takeId}.wav`)
   },
   exportTakeRawAudio: (takeId) => {
     const take = get().takes.find((item) => item.id === takeId)
     if (!take?.audioBlobUrl) return
     fetch(take.audioBlobUrl)
       .then((response) => response.blob())
-      .then((blob) => downloadBlob(blob, `chordpilot-${takeId}.webm`))
+      .then((blob) => downloadBlob(blob, `spacechord-${takeId}.webm`))
       .catch(() => undefined)
   },
   exportTakeMidi: (takeId) => {
     const take = get().takes.find((item) => item.id === takeId)
     if (!take) return
     const content = JSON.stringify(take.events, null, 2)
-    downloadBlob(new Blob([content], { type: 'application/json' }), `chordpilot-${takeId}.midi.json`)
+    downloadBlob(new Blob([content], { type: 'application/json' }), `spacechord-${takeId}.midi.json`)
   },
 }))

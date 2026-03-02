@@ -6,11 +6,11 @@ import './App.css'
 
 const SEED_CHORDS = `[Verse]\nC G Am F\n[Chorus]\nF G Em Am`
 
-function sectionLabel(section: SongSection): string {
+function sectionLabel (section: SongSection): string {
   return `${section.name} (${section.startIndex + 1}-${section.endIndex + 1})`
 }
 
-function isTypingTarget(target: EventTarget | null): boolean {
+function isTypingTarget (target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false
   const tag = target.tagName.toLowerCase()
   return (
@@ -23,7 +23,7 @@ function isTypingTarget(target: EventTarget | null): boolean {
 
 type BindingAction = PerformanceBinding['action']
 
-function App() {
+function App () {
   const [rawInput, setRawInput] = useState(SEED_CHORDS)
   const [sourceType, setSourceType] = useState<'manual' | 'chordpro'>('manual')
   const [importError, setImportError] = useState('')
@@ -34,7 +34,7 @@ function App() {
   const sheetViewRef = useRef<HTMLDivElement | null>(null)
   const importPanelRef = useRef<HTMLElement | null>(null)
 
-  function adjustTranspose(delta: number): void {
+  function adjustTranspose (delta: number): void {
     setTranspose(Math.max(-12, Math.min(12, transpose + delta)))
   }
 
@@ -131,7 +131,7 @@ function App() {
     [currentChordIndex, setCurrentChord, song],
   )
 
-  async function handleImport(event: FormEvent) {
+  async function handleImport (event: FormEvent) {
     event.preventDefault()
     setImportError('')
     try {
@@ -150,7 +150,7 @@ function App() {
   }, [importFromText])
 
   useEffect(() => {
-    function onKeyDown(event: KeyboardEvent): void {
+    function onKeyDown (event: KeyboardEvent): void {
       if (event.code === 'Space' && !isTypingTarget(event.target)) {
         event.preventDefault()
       }
@@ -192,7 +192,7 @@ function App() {
       }
     }
 
-    function onKeyUp(event: KeyboardEvent): void {
+    function onKeyUp (event: KeyboardEvent): void {
       const fermataBinding = bindings.find((item) => item.action === 'toggleFermata')?.key ?? 'KeyF'
       if (event.code === fermataBinding) {
         setFermataKeyHeld(false)
@@ -225,7 +225,7 @@ function App() {
   }, [currentChordIndex])
 
   useEffect(() => {
-    function onPointerDown(event: MouseEvent): void {
+    function onPointerDown (event: MouseEvent): void {
       const panel = importPanelRef.current
       if (!panel || !importPanelOpen) return
       if (panel.contains(event.target as Node)) return
@@ -241,8 +241,8 @@ function App() {
       <main className="layout">
         <header className="topbar">
           <div className="topbar-meta">
-            <h1>ChordPilot Pro</h1>
-            <p>Tempo-style cover performance workspace</p>
+            <h1>Spacechord Pro</h1>
+            <p>Paste the chords, then press space to play!</p>
           </div>
           <button
             className="btn btn-secondary sidebar-toggle"
@@ -260,7 +260,7 @@ function App() {
             onMouseLeave={() => setImportPanelOpen(false)}
             ref={importPanelRef}
           >
-            <h2>Song Import</h2>
+            <h2>Chord Import</h2>
             <form className="import-panel-content" onSubmit={handleImport}>
               <div className="row">
                 <label>
@@ -278,10 +278,10 @@ function App() {
                 placeholder="Paste chords or ChordPro"
               />
               <button className="btn btn-primary" type="submit">
-                Load Song
+                Load Chords
               </button>
             </form>
-            <p className="import-panel-peek">Load Song</p>
+            <p className="import-panel-peek">Load Chords</p>
             {importError && <p className="error import-panel-content">{importError}</p>}
             {warnings.length > 0 && (
               <ul className="warnings import-panel-content">
