@@ -295,9 +295,9 @@ function App() {
           <section className="panel performance-panel">
             <h2>Playfield</h2>
             <div className="sheet-focus-panel">
-              <div className="score-now">
+              <div className="sheet-current-corner">
                 <p className="label">Current chord</p>
-                <p className="current">{currentChord?.normalizedSymbol ?? '--'}</p>
+                <p className="corner-current">{currentChord?.normalizedSymbol ?? '--'}</p>
                 <p className="next">Next: {next?.normalizedSymbol ?? '--'}</p>
               </div>
               <div className="sheet-view" ref={sheetViewRef}>
