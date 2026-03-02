@@ -29,8 +29,10 @@ function App() {
   const [importError, setImportError] = useState('')
   const [captureAction, setCaptureAction] = useState<BindingAction | null>(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [importPanelOpen, setImportPanelOpen] = useState(false)
   const activeChordTokenRef = useRef<HTMLButtonElement | null>(null)
   const sheetViewRef = useRef<HTMLDivElement | null>(null)
+  const importPanelRef = useRef<HTMLElement | null>(null)
 
   function adjustTranspose(delta: number): void {
     setTranspose(Math.max(-12, Math.min(12, transpose + delta)))
@@ -222,6 +224,18 @@ function App() {
     })
   }, [currentChordIndex])
 
+  useEffect(() => {
+    function onPointerDown(event: MouseEvent): void {
+      const panel = importPanelRef.current
+      if (!panel || !importPanelOpen) return
+      if (panel.contains(event.target as Node)) return
+      setImportPanelOpen(false)
+    }
+
+    window.addEventListener('mousedown', onPointerDown)
+    return () => window.removeEventListener('mousedown', onPointerDown)
+  }, [importPanelOpen])
+
   return (
     <>
       <main className="layout">
@@ -240,9 +254,14 @@ function App() {
         </header>
 
         <div className="game-layout">
-          <section className="panel import-panel">
+          <section
+            className={`panel import-panel ${importPanelOpen ? 'open' : ''}`}
+            onMouseEnter={() => setImportPanelOpen(true)}
+            onMouseLeave={() => setImportPanelOpen(false)}
+            ref={importPanelRef}
+          >
             <h2>Song Import</h2>
-            <form onSubmit={handleImport}>
+            <form className="import-panel-content" onSubmit={handleImport}>
               <div className="row">
                 <label>
                   <span>Source</span>
@@ -262,9 +281,10 @@ function App() {
                 Load Song
               </button>
             </form>
-            {importError && <p className="error">{importError}</p>}
+            <p className="import-panel-peek">Load Song</p>
+            {importError && <p className="error import-panel-content">{importError}</p>}
             {warnings.length > 0 && (
-              <ul className="warnings">
+              <ul className="warnings import-panel-content">
                 {warnings.map((warning) => (
                   <li key={warning}>{warning}</li>
                 ))}

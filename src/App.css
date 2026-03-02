@@ -22,6 +22,8 @@
   --space-3: 0.95rem;
   --space-4: 1.2rem;
   --space-5: 1.6rem;
+  --import-peek-width: 34px;
+  --side-panel-top: 12px;
 }
 
 .layout {
@@ -75,15 +77,70 @@
 }
 
 .game-layout {
+  position: relative;
   display: grid;
-  grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+  grid-template-columns: 1fr;
   gap: var(--space-3);
   align-items: start;
+  padding-left: 46px;
 }
 
 .import-panel {
-  position: sticky;
-  top: 0.8rem;
+  position: fixed;
+  top: 130px;
+  left: 0;
+  z-index: 20;
+  width: min(340px, calc(100vw - 10px));
+  max-height: calc(100vh - 230px);
+  overflow-y: auto;
+  transform: translateX(calc(-100% + var(--import-peek-width)));
+  opacity: 0.92;
+  transition: transform 180ms ease, opacity 180ms ease;
+  border-left: 0;
+  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+}
+
+.import-panel.open {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.import-panel-peek {
+  position: absolute;
+  right: 0;
+  top: 0.95rem;
+  margin: 0;
+  width: var(--import-peek-width);
+  min-height: 118px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.64rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #dce5ff;
+  background: rgba(91, 124, 255, 0.22);
+  border: 1px solid rgba(91, 124, 255, 0.45);
+  border-right: 0;
+  border-radius: 8px 0 0 8px;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  pointer-events: none;
+}
+
+.import-panel-content {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease;
+}
+
+.import-panel.open .import-panel-content {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.import-panel.open .import-panel-peek {
+  opacity: 0;
 }
 
 .performance-panel {
@@ -441,9 +498,9 @@ thead th {
 
 .control-sidebar {
   position: fixed;
-  top: 0;
+  top: var(--side-panel-top);
   right: 0;
-  height: 100vh;
+  height: calc(100vh - var(--side-panel-top));
   width: min(460px, 94vw);
   padding: 1rem;
   box-sizing: border-box;
@@ -487,10 +544,24 @@ thead th {
 
   .game-layout {
     grid-template-columns: 1fr;
+    padding-left: 0;
   }
 
   .import-panel {
     position: static;
+    width: 100%;
+    max-height: none;
+    transform: none;
+    opacity: 1;
+  }
+
+  .import-panel-content {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .import-panel-peek {
+    display: none;
   }
 
   .performance-panel {
