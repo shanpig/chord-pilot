@@ -26,11 +26,12 @@
 
 .layout {
   display: grid;
-  gap: 1rem;
-  width: min(1200px, 100%);
+  gap: 0.8rem;
+  width: min(1400px, 100%);
   margin: 0 auto;
-  padding: 1.5rem;
+  padding: 1rem 1rem 5.5rem;
   box-sizing: border-box;
+  min-height: 100vh;
 }
 
 .topbar {
@@ -59,7 +60,7 @@
 }
 
 .sidebar-toggle {
-  min-width: 138px;
+  min-width: 116px;
 }
 
 .panel {
@@ -71,6 +72,22 @@
   overflow-x: hidden;
   display: grid;
   gap: var(--space-3);
+}
+
+.game-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: start;
+}
+
+.import-panel {
+  position: sticky;
+  top: 0.8rem;
+}
+
+.performance-panel {
+  min-height: calc(100vh - 180px);
 }
 
 .panel h2 {
@@ -187,10 +204,11 @@ button:focus-visible {
 }
 
 .sheet-focus-panel {
-  background: linear-gradient(160deg, rgba(91, 124, 255, 0.16), rgba(91, 124, 255, 0.05));
+  background: linear-gradient(160deg, rgba(91, 124, 255, 0.2), rgba(91, 124, 255, 0.06));
   border-radius: var(--radius-md);
   border: 1px solid rgba(91, 124, 255, 0.4);
-  padding: 0.85rem;
+  padding: 1rem;
+  min-height: calc(100vh - 220px);
 }
 
 .score-now {
@@ -283,7 +301,7 @@ button:focus-visible {
 .sheet-view {
   display: grid;
   gap: var(--space-2);
-  max-height: 320px;
+  max-height: calc(100vh - 350px);
   overflow-y: auto;
   padding: 0.2rem 0.2rem 0.4rem;
 }
@@ -378,6 +396,33 @@ thead th {
   gap: var(--space-1);
 }
 
+.control-hud {
+  position: fixed;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.55rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(8, 15, 33, 0.58);
+  border: 1px solid rgba(91, 124, 255, 0.35);
+  backdrop-filter: blur(8px);
+  z-index: 45;
+}
+
+.hud-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #dce5ff;
+  min-height: 34px;
+  padding: 0.4rem 0.7rem;
+  font-size: 0.86rem;
+}
+
 .sidebar-backdrop {
   position: fixed;
   inset: 0;
@@ -399,7 +444,7 @@ thead th {
   top: 0;
   right: 0;
   height: 100vh;
-  width: min(430px, 92vw);
+  width: min(460px, 94vw);
   padding: 1rem;
   box-sizing: border-box;
   overflow-y: auto;
@@ -440,6 +485,26 @@ thead th {
     border-radius: var(--radius-md);
   }
 
+  .game-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .import-panel {
+    position: static;
+  }
+
+  .performance-panel {
+    min-height: auto;
+  }
+
+  .sheet-focus-panel {
+    min-height: auto;
+  }
+
+  .sheet-view {
+    max-height: 52vh;
+  }
+
   .take-actions {
     flex-wrap: wrap;
   }
@@ -451,5 +516,11 @@ thead th {
 
   .sidebar-toggle {
     width: 100%;
+  }
+
+  .control-hud {
+    width: calc(100vw - 18px);
+    bottom: 8px;
+    border-radius: 14px;
   }
 }

@@ -3,6 +3,7 @@ import type { ChordEvent, ChordSheetLine, ChordSheetParagraph, ParseResult, Song
 
 const SECTION_PATTERN = /^\s*\[(.+?)\]\s*$/
 const TOKEN_SPLIT_PATTERN = /\s+|\|/g
+const CONTINUATION_TOKENS = new Set(['-', '–', '—'])
 
 function createSection(id: string, name: string, startIndex: number): SongSection {
   return {
@@ -142,6 +143,14 @@ export function parseChordText(input: string): ParseResult {
 
     const lineTokens: ChordSheetLine['tokens'] = []
     for (const candidate of candidateTokens) {
+      if (CONTINUATION_TOKENS.has(candidate.token)) {
+        lineTokens?.push({
+          id: `line-${lineIndex}-token-${lineTokens.length}`,
+          text: candidate.token,
+        })
+        continue
+      }
+
       const parsed = parseChordSymbol(candidate.token, chords.length)
       if (!parsed) {
         warnings.push(`Could not parse chord token: "${candidate.token}"`)

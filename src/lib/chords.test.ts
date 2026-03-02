@@ -33,4 +33,9 @@ describe('chords parser', () => {
     const indices = chordLine?.tokens?.map((token) => token.chordIndex).filter((item) => item !== undefined)
     expect(indices).toEqual([0, 1, 2, 3])
   })
+
+  it('does not warn for continuation marker token "-"', () => {
+    const result = parseChordText('[Verse]\nC - G -\nlyric line')
+    expect(result.warnings.some((warning) => warning.includes('"-"'))).toBe(false)
+  })
 })
