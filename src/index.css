@@ -1,12 +1,18 @@
 :root {
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  color: #f6f8ff;
   background:
     radial-gradient(circle at 15% 10%, rgba(91, 124, 255, 0.15), transparent 35%),
-    radial-gradient(circle at 85% 12%, rgba(104, 224, 196, 0.08), transparent 30%),
-    #0a1020;
+    radial-gradient(circle at 85% 12%, rgba(104, 224, 196, 0.08), transparent 30%), #0a1020;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
