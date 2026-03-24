@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties, FormEvent } from 'react'
 import type { InstrumentPreset, PerformanceBinding, SongSection, VoicingStyle } from './types'
 import { useChordPilotStore } from './store/useChordPilotStore'
+import { getChordColorCssVars } from './lib/chordColor'
 import './App.css'
 
 const SEED_CHORDS = `[Verse 1]
@@ -61,8 +62,6 @@ C     G/B     Am7        D
 愚人不快樂 但身不由己
 C     G/B    Am7     D       G
 捨不得走的我還在等什麼奇蹟`
-const CHORD_ACCENT_COLORS = ['#ff6a42', '#e5be46', '#46cba5', '#5782e4', '#9662de', '#df5ba9']
-
 function sectionLabel (section: SongSection): string {
   return `${section.name} (${section.startIndex + 1}-${section.endIndex + 1})`
 }
@@ -142,14 +141,39 @@ function App () {
 
   const currentChord = song?.chords[currentChordIndex]
   const next = song?.chords[Math.min(currentChordIndex + 1, Math.max((song?.chords.length ?? 1) - 1, 0))]
-  const currentChordColor = CHORD_ACCENT_COLORS[((currentChordIndex % CHORD_ACCENT_COLORS.length) + CHORD_ACCENT_COLORS.length) % CHORD_ACCENT_COLORS.length]
-  const currentChordStyle = { '--current-chord-color': currentChordColor } as CSSProperties
+  const chordColorStyles = useMemo(() => {
+    const styleMap = new Map<number, CSSProperties>()
+    for (const chord of song?.chords ?? []) {
+      styleMap.set(chord.index, getChordColorCssVars(chord.normalizedSymbol) as CSSProperties)
+    }
+    return styleMap
+  }, [song])
+  const currentChordStyle = (currentChord
+    ? (getChordColorCssVars(currentChord.normalizedSymbol) as CSSProperties)
+    : undefined)
 
   const triggerPlayCurrentChord = useCallback(async () => {
     setRippleChordIndex(currentChordIndex)
     setRippleNonce((value) => value + 1)
     await playCurrentChord()
   }, [currentChordIndex, playCurrentChord])
+
+  const scrollToCurrentChord = useCallback(() => {
+    const activeToken = activeChordTokenRef.current
+    const container = sheetViewRef.current
+    if (!activeToken || !container) return
+
+    const containerRect = container.getBoundingClientRect()
+    const tokenRect = activeToken.getBoundingClientRect()
+    const tokenTopWithinContainer = tokenRect.top - containerRect.top + container.scrollTop
+
+    // Keep active chord around upper third so lyric lines below remain visible.
+    const targetTop = Math.max(0, tokenTopWithinContainer - container.clientHeight * 0.28)
+    container.scrollTo({
+      top: targetTop,
+      behavior: 'smooth',
+    })
+  }, [])
 
   const chordSheet = useMemo(
     () =>
@@ -191,6 +215,7 @@ function App () {
                       }
                       onClick={() => setCurrentChord(token.chordIndex ?? 0)}
                       ref={token.chordIndex === currentChordIndex ? activeChordTokenRef : null}
+                      style={chordColorStyles.get(token.chordIndex) ?? undefined}
                     >
                       {token.text}
                     </button>
@@ -201,7 +226,7 @@ function App () {
           })}
         </div>
       )),
-    [currentChordIndex, rippleChordIndex, rippleNonce, setCurrentChord, song],
+    [chordColorStyles, currentChordIndex, rippleChordIndex, rippleNonce, setCurrentChord, song],
   )
 
   async function handleImport (event: FormEvent) {
@@ -292,21 +317,8 @@ function App () {
   }, [bindings, captureAction, nextChord, prevChord, setFermataKeyHeld, toggleRecording, triggerPlayCurrentChord, upsertBinding])
 
   useEffect(() => {
-    const activeToken = activeChordTokenRef.current
-    const container = sheetViewRef.current
-    if (!activeToken || !container) return
-
-    const containerRect = container.getBoundingClientRect()
-    const tokenRect = activeToken.getBoundingClientRect()
-    const tokenTopWithinContainer = tokenRect.top - containerRect.top + container.scrollTop
-
-    // Keep active chord around upper third so lyric lines below remain visible.
-    const targetTop = Math.max(0, tokenTopWithinContainer - container.clientHeight * 0.28)
-    container.scrollTo({
-      top: targetTop,
-      behavior: 'smooth',
-    })
-  }, [currentChordIndex])
+    scrollToCurrentChord()
+  }, [currentChordIndex, scrollToCurrentChord])
 
   useEffect(() => {
     function onPointerDown (event: PointerEvent): void {
@@ -395,7 +407,20 @@ function App () {
           <section className="panel performance-panel">
             <h2>Playfield</h2>
             <div className="sheet-focus-panel">
-              <div className="sheet-current-corner" style={currentChordStyle}>
+              <div
+                className="sheet-current-corner"
+                onClick={scrollToCurrentChord}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault()
+                    scrollToCurrentChord()
+                  }
+                }}
+                role="button"
+                style={currentChordStyle}
+                tabIndex={0}
+                title="Jump to current chord in sheet"
+              >
                 <p className="label">Current chord</p>
                 <p className="corner-current">{currentChord?.normalizedSymbol ?? '--'}</p>
                 <p className="next">Next: {next?.normalizedSymbol ?? '--'}</p>
