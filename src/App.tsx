@@ -86,6 +86,7 @@ function App () {
   const [captureAction, setCaptureAction] = useState<BindingAction | null>(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [importPanelOpen, setImportPanelOpen] = useState(false)
+  const [onboardingOpen, setOnboardingOpen] = useState(true)
   const [isCompactScreen, setIsCompactScreen] = useState(false)
   const [rippleChordIndex, setRippleChordIndex] = useState<number | null>(null)
   const [rippleNonce, setRippleNonce] = useState(0)
@@ -348,6 +349,38 @@ function App () {
             {sidebarOpen ? 'Close' : 'Controls'} ☰
           </button>
         </header>
+
+        <section className="panel onboarding-panel">
+          <div className="onboarding-head">
+            <h2>Quick Onboarding</h2>
+            <button
+              aria-expanded={onboardingOpen}
+              className="btn btn-secondary"
+              onClick={() => setOnboardingOpen((value) => !value)}
+              type="button"
+            >
+              {onboardingOpen ? 'Hide steps' : 'Show steps'}
+            </button>
+          </div>
+          {onboardingOpen && (
+            <div className="onboarding-grid">
+              <article className="onboarding-step">
+                <img alt="Step 1 onboarding screenshot" className="onboarding-image" loading="lazy" src="/step1.png" />
+                <h3>Step 1: Copy songs with chords from any website</h3>
+                <p>Copy chords from your favorite song. Include the [Verse], [Chorus], [Bridge], [Outro], etc if you want.</p>
+              </article>
+              <article className="onboarding-step">
+                <img alt="Step 2 onboarding screenshot" className="onboarding-image" loading="lazy" src="/step2.png" />
+                <h3>Step 2: Paste chords and use keyboard to play</h3>
+                <p>
+                  <kbd>Space</kbd> to play the current chord, <br />
+                  <kbd>→</kbd> to play the next chord, <br />
+                  <kbd>←</kbd> to play the previous chord.
+                </p>
+              </article>
+            </div>
+          )}
+        </section>
 
         <div className="game-layout">
           <section
