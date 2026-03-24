@@ -2,8 +2,8 @@ import { Chord } from 'tonal'
 import type { ChordEvent, ChordSheetLine, ChordSheetParagraph, ParseResult, SongSection } from '../types'
 
 const SECTION_PATTERN = /^\s*\[(.+?)\]\s*$/
-const TOKEN_SPLIT_PATTERN = /\s+|\|/g
 const CONTINUATION_TOKENS = new Set(['-', '–', '—'])
+const CHORD_LINE_TOKEN_PATTERN = /[^|\s]+|[|\s]+/g
 
 function createSection(id: string, name: string, startIndex: number): SongSection {
   return {
@@ -119,18 +119,24 @@ export function parseChordText(input: string): ParseResult {
       continue
     }
 
-    const tokens = line
-      .split(TOKEN_SPLIT_PATTERN)
-      .map((token) => token.trim())
-      .filter(Boolean)
+    const rawTokens = rawLine.match(CHORD_LINE_TOKEN_PATTERN) ?? []
+    const tokenParts = rawTokens.map((token) => {
+      const trimmed = token.trim()
+      const isSpacer = trimmed.length === 0 || trimmed === '|'
+      const isContinuation = CONTINUATION_TOKENS.has(trimmed)
+      const parsed = !isSpacer && !isContinuation ? parseChordSymbol(trimmed, 0) : null
+      return {
+        raw: token,
+        token: trimmed,
+        isSpacer,
+        isContinuation,
+        parsed,
+      }
+    })
 
-    const candidateTokens = tokens.map((token) => ({
-      token,
-      // Probe parseability without assigning final chord index yet.
-      parsed: parseChordSymbol(token, 0),
-    }))
-    const parsedCount = candidateTokens.filter((candidate) => candidate.parsed !== null).length
-    const isChordLine = parsedCount > 0 && parsedCount / Math.max(1, tokens.length) >= 0.5
+    const candidateTokens = tokenParts.filter((part) => !part.isSpacer)
+    const parsedCount = candidateTokens.filter((candidate) => candidate.parsed !== null || candidate.isContinuation).length
+    const isChordLine = parsedCount > 0 && parsedCount / Math.max(1, candidateTokens.length) >= 0.5
 
     if (!isChordLine) {
       pushLine({
@@ -142,21 +148,29 @@ export function parseChordText(input: string): ParseResult {
     }
 
     const lineTokens: ChordSheetLine['tokens'] = []
-    for (const candidate of candidateTokens) {
-      if (CONTINUATION_TOKENS.has(candidate.token)) {
+    for (const part of tokenParts) {
+      if (part.isSpacer) {
         lineTokens?.push({
           id: `line-${lineIndex}-token-${lineTokens.length}`,
-          text: candidate.token,
+          text: part.raw,
         })
         continue
       }
 
-      const parsed = parseChordSymbol(candidate.token, chords.length)
-      if (!parsed) {
-        warnings.push(`Could not parse chord token: "${candidate.token}"`)
+      if (part.isContinuation) {
         lineTokens?.push({
           id: `line-${lineIndex}-token-${lineTokens.length}`,
-          text: candidate.token,
+          text: part.token,
+        })
+        continue
+      }
+
+      const parsed = parseChordSymbol(part.token, chords.length)
+      if (!parsed) {
+        warnings.push(`Could not parse chord token: "${part.token}"`)
+        lineTokens?.push({
+          id: `line-${lineIndex}-token-${lineTokens.length}`,
+          text: part.token,
         })
         continue
       }

@@ -1,10 +1,67 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import type { FormEvent } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import type { CSSProperties, FormEvent } from 'react'
 import type { InstrumentPreset, PerformanceBinding, SongSection, VoicingStyle } from './types'
 import { useChordPilotStore } from './store/useChordPilotStore'
 import './App.css'
 
-const SEED_CHORDS = `[Verse]\nC G Am F\n[Chorus]\nF G Em Am`
+const SEED_CHORDS = `[Verse 1]
+N.C.
+就這樣陪你走著走著 又是幾年過了呢
+N.C.
+彷彿時間不怕蹉跎 美好的停格
+G     D/F#      Em7      D
+只有這天說著真話 用著玩笑的身分
+C       D         G
+霸佔朋友的姿態 愛著一個人
+ 
+[Chorus]
+G     D/F#      Em7      D
+想說愛你 想要抱你 想你走進我的生活裡
+C       Am7         D
+想未來一切可能多美好 原來只是我而已
+G      D/F#     Em7        Dm7
+我喜歡你 最愛是你 我開玩笑的請別介意
+G7     C      G/B     Am7    D
+愚人節快樂 快樂地椎心 誰能告訴我為何 我還停在原地
+ 
+[Verse 2]
+G        D/F#      Em7         D
+我已經這樣寫一百首 死心塌地的情歌
+C        D          G
+感謝是你給我靈感 給得那麼深刻
+G      D/F#      Em7        D
+如果還有什麼遺憾 可能還不夠資格
+C      Am7     D
+寫你寫我 卻沒能寫成個我們
+ 
+[Chorus]
+G     D/F#     Em7        D
+想說愛你 想要抱你 想你走進我的生活裡
+C     Am7         D
+想未來一切可能多美好 原來只是我而已
+G      D/F#         Em7     Dm7
+我喜歡你 最愛是你 我開玩笑的請別介意
+G7      C         G/B        Am7       D
+愚人節快樂 快樂地椎心 誰能告訴我為何 我還停在原地
+ 
+[Bridge]
+Em7    C      G/B             D
+無法愛你 無法抱你 無法讓你聽見我的心
+Em7       C         G/B        Am7     D
+無法克制重複想起那些 失去意義的或許
+ 
+[Chorus]
+G     D/F#     Em7        Dm7
+我喜歡你 最愛是你 我最後也沒走到結局
+G7     C      G/B        Am7       D
+愚人節快樂 就停在這裡 說不出口的祝福 就當我欠你
+ 
+[Outro]
+C     G/B     Am7        D
+愚人不快樂 但身不由己
+C     G/B    Am7     D       G
+捨不得走的我還在等什麼奇蹟`
+const CHORD_ACCENT_COLORS = ['#ff6a42', '#e5be46', '#46cba5', '#5782e4', '#9662de', '#df5ba9']
 
 function sectionLabel (section: SongSection): string {
   return `${section.name} (${section.startIndex + 1}-${section.endIndex + 1})`
@@ -30,6 +87,9 @@ function App () {
   const [captureAction, setCaptureAction] = useState<BindingAction | null>(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [importPanelOpen, setImportPanelOpen] = useState(false)
+  const [isCompactScreen, setIsCompactScreen] = useState(false)
+  const [rippleChordIndex, setRippleChordIndex] = useState<number | null>(null)
+  const [rippleNonce, setRippleNonce] = useState(0)
   const activeChordTokenRef = useRef<HTMLButtonElement | null>(null)
   const sheetViewRef = useRef<HTMLDivElement | null>(null)
   const importPanelRef = useRef<HTMLElement | null>(null)
@@ -82,6 +142,14 @@ function App () {
 
   const currentChord = song?.chords[currentChordIndex]
   const next = song?.chords[Math.min(currentChordIndex + 1, Math.max((song?.chords.length ?? 1) - 1, 0))]
+  const currentChordColor = CHORD_ACCENT_COLORS[((currentChordIndex % CHORD_ACCENT_COLORS.length) + CHORD_ACCENT_COLORS.length) % CHORD_ACCENT_COLORS.length]
+  const currentChordStyle = { '--current-chord-color': currentChordColor } as CSSProperties
+
+  const triggerPlayCurrentChord = useCallback(async () => {
+    setRippleChordIndex(currentChordIndex)
+    setRippleNonce((value) => value + 1)
+    await playCurrentChord()
+  }, [currentChordIndex, playCurrentChord])
 
   const chordSheet = useMemo(
     () =>
@@ -114,8 +182,13 @@ function App () {
                   }
                   return (
                     <button
-                      className={`chord-chip ${token.chordIndex === currentChordIndex ? 'active' : ''}`}
-                      key={token.id}
+                      className={`chord-chip ${token.chordIndex === currentChordIndex ? 'active' : ''} ${token.chordIndex === currentChordIndex && token.chordIndex === rippleChordIndex ? 'ripple-play' : ''
+                        }`}
+                      key={
+                        token.chordIndex === currentChordIndex && token.chordIndex === rippleChordIndex
+                          ? `${token.id}-${rippleNonce}`
+                          : token.id
+                      }
                       onClick={() => setCurrentChord(token.chordIndex ?? 0)}
                       ref={token.chordIndex === currentChordIndex ? activeChordTokenRef : null}
                     >
@@ -128,7 +201,7 @@ function App () {
           })}
         </div>
       )),
-    [currentChordIndex, setCurrentChord, song],
+    [currentChordIndex, rippleChordIndex, rippleNonce, setCurrentChord, song],
   )
 
   async function handleImport (event: FormEvent) {
@@ -140,6 +213,9 @@ function App () {
       } else {
         importFromChordPro(rawInput)
       }
+      if (isCompactScreen) {
+        setImportPanelOpen(false)
+      }
     } catch (error) {
       setImportError((error as Error).message)
     }
@@ -148,6 +224,14 @@ function App () {
   useEffect(() => {
     importFromText(SEED_CHORDS)
   }, [importFromText])
+
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 1024px)')
+    const update = (): void => setIsCompactScreen(media.matches)
+    update()
+    media.addEventListener('change', update)
+    return () => media.removeEventListener('change', update)
+  }, [])
 
   useEffect(() => {
     function onKeyDown (event: KeyboardEvent): void {
@@ -177,7 +261,7 @@ function App () {
 
       if (event.code === playBinding) {
         event.preventDefault()
-        void playCurrentChord()
+        void triggerPlayCurrentChord()
       } else if (event.code === nextBinding) {
         nextChord()
       } else if (event.code === prevBinding) {
@@ -205,7 +289,7 @@ function App () {
       window.removeEventListener('keydown', onKeyDown)
       window.removeEventListener('keyup', onKeyUp)
     }
-  }, [bindings, captureAction, nextChord, playCurrentChord, prevChord, setFermataKeyHeld, toggleRecording, upsertBinding])
+  }, [bindings, captureAction, nextChord, prevChord, setFermataKeyHeld, toggleRecording, triggerPlayCurrentChord, upsertBinding])
 
   useEffect(() => {
     const activeToken = activeChordTokenRef.current
@@ -225,16 +309,16 @@ function App () {
   }, [currentChordIndex])
 
   useEffect(() => {
-    function onPointerDown (event: MouseEvent): void {
+    function onPointerDown (event: PointerEvent): void {
       const panel = importPanelRef.current
-      if (!panel || !importPanelOpen) return
+      if (!panel || !importPanelOpen || !isCompactScreen) return
       if (panel.contains(event.target as Node)) return
       setImportPanelOpen(false)
     }
 
-    window.addEventListener('mousedown', onPointerDown)
-    return () => window.removeEventListener('mousedown', onPointerDown)
-  }, [importPanelOpen])
+    window.addEventListener('pointerdown', onPointerDown)
+    return () => window.removeEventListener('pointerdown', onPointerDown)
+  }, [importPanelOpen, isCompactScreen])
 
   return (
     <>
@@ -255,13 +339,29 @@ function App () {
 
         <div className="game-layout">
           <section
-            className={`panel import-panel ${importPanelOpen ? 'open' : ''}`}
-            onMouseEnter={() => setImportPanelOpen(true)}
-            onMouseLeave={() => setImportPanelOpen(false)}
+            className={`panel import-panel ${importPanelOpen ? 'open' : ''} ${isCompactScreen ? 'compact' : ''}`}
+            onMouseEnter={() => {
+              if (!isCompactScreen) setImportPanelOpen(true)
+            }}
+            onMouseLeave={() => {
+              if (!isCompactScreen) setImportPanelOpen(false)
+            }}
             ref={importPanelRef}
           >
-            <h2>Chord Import</h2>
-            <form className="import-panel-content" onSubmit={handleImport}>
+            <div className="import-panel-head">
+              <h2>Chord Import</h2>
+              {isCompactScreen && (
+                <button
+                  aria-expanded={importPanelOpen}
+                  className="btn btn-secondary import-panel-toggle"
+                  onClick={() => setImportPanelOpen((value) => !value)}
+                  type="button"
+                >
+                  {importPanelOpen ? 'Collapse' : 'Expand'}
+                </button>
+              )}
+            </div>
+            <form className={`import-panel-content ${importPanelOpen ? 'open' : ''}`} onSubmit={handleImport}>
               <div className="row">
                 <label>
                   <span>Source</span>
@@ -278,13 +378,13 @@ function App () {
                 placeholder="Paste chords or ChordPro"
               />
               <button className="btn btn-primary" type="submit">
-                Load Chords
+                Chord Import
               </button>
             </form>
-            <p className="import-panel-peek">Load Chords</p>
-            {importError && <p className="error import-panel-content">{importError}</p>}
+            {!isCompactScreen && <p className="import-panel-peek">Chord Import</p>}
+            {importError && <p className={`error import-panel-content ${importPanelOpen ? 'open' : ''}`}>{importError}</p>}
             {warnings.length > 0 && (
-              <ul className="warnings import-panel-content">
+              <ul className={`warnings import-panel-content ${importPanelOpen ? 'open' : ''}`}>
                 {warnings.map((warning) => (
                   <li key={warning}>{warning}</li>
                 ))}
@@ -295,7 +395,7 @@ function App () {
           <section className="panel performance-panel">
             <h2>Playfield</h2>
             <div className="sheet-focus-panel">
-              <div className="sheet-current-corner">
+              <div className="sheet-current-corner" style={currentChordStyle}>
                 <p className="label">Current chord</p>
                 <p className="corner-current">{currentChord?.normalizedSymbol ?? '--'}</p>
                 <p className="next">Next: {next?.normalizedSymbol ?? '--'}</p>
@@ -309,7 +409,7 @@ function App () {
       </main>
 
       <div className="control-hud" role="group" aria-label="Game controls">
-        <button className="btn btn-ghost hud-btn" onClick={() => void playCurrentChord()}>
+        <button className="btn btn-ghost hud-btn" onClick={() => void triggerPlayCurrentChord()}>
           Space Play
         </button>
         <button className="btn btn-ghost hud-btn" onClick={prevChord}>
