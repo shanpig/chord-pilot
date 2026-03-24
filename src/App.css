@@ -31,8 +31,8 @@ kbd {
   border: 1px solid #ccc;
   border-radius: 3px;
   padding: 2px 4px;
-  font-size: 0.85em;
   font-family: monospace;
+  font-size: 0.85em;
 }
 
 .layout {
