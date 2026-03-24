@@ -122,14 +122,21 @@ kbd {
   background: linear-gradient(180deg, #fdfdff, #f6f9ff);
 }
 
-.onboarding-image {
-  width: max(100%, 220px);
+.onboarding-image-frame {
+  width: 100%;
   aspect-ratio: 19 / 9;
-  object-fit: cover;
-  justify-self: center;
+  justify-self: stretch;
   border-radius: 12px;
   border: 1px solid #d8dff1;
   box-shadow: 0 10px 22px rgba(35, 50, 88, 0.12);
+  background: #eef2fb;
+  overflow: hidden;
+}
+
+.onboarding-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   display: block;
 }
 

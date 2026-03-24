@@ -365,12 +365,32 @@ function App () {
           {onboardingOpen && (
             <div className="onboarding-grid">
               <article className="onboarding-step">
-                <img alt="Step 1 onboarding screenshot" className="onboarding-image" loading="lazy" src="/step1.png" />
+                <div className="onboarding-image-frame">
+                  <img
+                    alt="Step 1 onboarding screenshot"
+                    className="onboarding-image"
+                    decoding="async"
+                    height={104}
+                    loading="lazy"
+                    src="/step1.png"
+                    width={220}
+                  />
+                </div>
                 <h3>Step 1: Copy songs with chords from any website</h3>
                 <p>Copy chords from your favorite song. Include the [Verse], [Chorus], [Bridge], [Outro], etc if you want.</p>
               </article>
               <article className="onboarding-step">
-                <img alt="Step 2 onboarding screenshot" className="onboarding-image" loading="lazy" src="/step2.png" />
+                <div className="onboarding-image-frame">
+                  <img
+                    alt="Step 2 onboarding screenshot"
+                    className="onboarding-image"
+                    decoding="async"
+                    height={104}
+                    loading="lazy"
+                    src="/step2.png"
+                    width={220}
+                  />
+                </div>
                 <h3>Step 2: Paste chords and use keyboard to play</h3>
                 <p>
                   <kbd>Space</kbd> to play the current chord, <br />
